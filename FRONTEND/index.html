@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Blog Dashboard</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+            background: #f4f6f9;
+        }
+
+        .navbar {
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            font-size: 20px;
+        }
+
+        .menu {
+            padding: 15px;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .menu button {
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            background: #3498db;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .menu button:hover {
+            background: #2980b9;
+        }
+
+        #content {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card img {
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        .card h3 {
+            margin: 10px 0;
+        }
+
+        a {
+            text-decoration: none;
+            color: #3498db;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    Blog Website Dashboard
+</div>
+
+<div class="menu">
+    <button onclick="loadDBPosts()">My Posts</button>
+    <button onclick="loadAPIposts()">API Posts</button>
+    <button onclick="loadPhotos()">Photos</button>
+    <button onclick="loadAlbums()">Albums</button>
+    <button onclick="loadUsers()">Users</button>
+    <a href="create.html"><button>Create Post</button></a>
+</div>
+
+<div id="content"></div>
+
+<script>
+const API = "http://127.0.0.1:5000/api";
+
+// Database Posts
+async function loadDBPosts() {
+    let res = await fetch(API + "/posts");
+    let posts = await res.json();
+
+    let div = document.getElementById("content");
+    div.innerHTML = "";
+
+    posts.forEach(p => {
+        div.innerHTML += `
+            <div class="card">
+                <img src="${p.image}">
+                <h3>${p.title}</h3>
+                <p>${p.body.substring(0,100)}...</p>
+                <a href="post.html?id=${p.id}">Read More</a>
+            </div>
+        `;
+    });
+}
+
+// External API Posts
+async function loadAPIposts() {
+    let res = await fetch(API + "/fetch-posts");
+    let posts = await res.json();
+
+    let div = document.getElementById("content");
+    div.innerHTML = "";
+
+    posts.slice(0,10).forEach(p => {
+        div.innerHTML += `
+            <div class="card">
+                <h3>${p.title}</h3>
+                <p>${p.body}</p>
+            </div>
+        `;
+    });
+}
+
+// Photos
+async function loadPhotos() {
+    let res = await fetch(API + "/photos");
+    let photos = await res.json();
+
+    let div = document.getElementById("content");
+    div.innerHTML = "";
+
+    photos.forEach(photo => {
+        div.innerHTML += `
+            <div class="card">
+                <img src="${photo.url}">
+                <p>${photo.title}</p>
+            </div>
+        `;
+    });
+}
+
+// Albums
+async function loadAlbums() {
+    let res = await fetch(API + "/albums");
+    let albums = await res.json();
+
+    let div = document.getElementById("content");
+    div.innerHTML = "";
+
+    albums.forEach(album => {
+        div.innerHTML += `
+            <div class="card">
+                <h3>Album</h3>
+                <p>${album.title}</p>
+            </div>
+        `;
+    });
+}
+
+// Users
+async function loadUsers() {
+    let res = await fetch(API + "/users");
+    let users = await res.json();
+
+    let div = document.getElementById("content");
+    div.innerHTML = "";
+
+    users.forEach(user => {
+        div.innerHTML += `
+            <div class="card">
+                <h3>${user.name}</h3>
+                <p>${user.email}</p>
+                <p>${user.company.name}</p>
+            </div>
+        `;
+    });
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Article Detail | Editorial</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #fdfdfd;
+            --text-main: #1a1a1a;
+            --text-muted: #666;
+            --accent: #0056b3;
+            --card-bg: #ffffff;
+        }
+
+        body.dark {
+            --bg-color: #111;
+            --text-main: #eee;
+            --text-muted: #aaa;
+            --card-bg: #1e1e1e;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.8;
+        }
+
+        /* Progress Bar */
+        #progressBar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: var(--accent);
+            width: 0%;
+            z-index: 999;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            background: var(--card-bg);
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            z-index: 100;
+        }
+
+        .container {
+            max-width: 750px;
+            margin: auto;
+            padding: 40px 20px;
+        }
+
+        .post-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+        }
+
+        .meta {
+            color: var(--accent);
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .post-body {
+            font-size: 1.2rem;
+            margin-top: 30px;
+            white-space: pre-line;
+        }
+
+        img {
+            width: 100%;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+
+        /* Like Button */
+        .like-btn {
+            margin-top: 20px;
+            padding: 10px 18px;
+            border: none;
+            background: var(--accent);
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        /* Comments */
+        .comment {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .comment-author {
+            font-weight: bold;
+        }
+
+        .toggle-btn {
+            cursor: pointer;
+            border: none;
+            background: var(--accent);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="progressBar"></div>
+
+<header>
+    <a href="index.html">← Back</a>
+    <button class="toggle-btn" onclick="toggleDark()">Dark Mode</button>
+</header>
+
+<div class="container">
+    <div id="post"></div>
+
+    <h2>Comments</h2>
+    <div id="comments"></div>
+</div>
+
+<script>
+async function loadPost() {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+
+    const postRes = await fetch(`https://jsonplaceholder.typicode.com/posts/${id}`);
+    const post = await postRes.json();
+
+    const userRes = await fetch(`https://jsonplaceholder.typicode.com/users/${post.userId}`);
+    const user = await userRes.json();
+
+    const commentsRes = await fetch(`https://jsonplaceholder.typicode.com/posts/${id}/comments`);
+    const comments = await commentsRes.json();
+
+    const readTime = Math.ceil(post.body.split(" ").length / 200);
+
+    document.getElementById("post").innerHTML = `
+        <h1 class="post-title">${post.title}</h1>
+        <div class="meta">By ${user.name} • ${readTime} min read</div>
+        <img src="https://picsum.photos/900/400?random=${id}">
+        <div class="post-body">${post.body}</div>
+        <button class="like-btn" onclick="likePost()">❤ Like</button>
+        <span id="likeCount">0</span>
+    `;
+
+    let commentHTML = "";
+    comments.forEach(c => {
+        commentHTML += `
+            <div class="comment">
+                <div class="comment-author">${c.name}</div>
+                <div>${c.email}</div>
+                <p>${c.body}</p>
+            </div>
+        `;
+    });
+
+    document.getElementById("comments").innerHTML = commentHTML;
+}
+
+function toggleDark() {
+    document.body.classList.toggle("dark");
+}
+
+let likes = 0;
+function likePost() {
+    likes++;
+    document.getElementById("likeCount").innerText = likes;
+}
+
+/* Progress Bar */
+window.onscroll = function() {
+    let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+    let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    let scrolled = (winScroll / height) * 100;
+    document.getElementById("progressBar").style.width = scrolled + "%";
+};
+
+loadPost();
+</script>
+
+</body>
+</html>
